@@ -35,6 +35,10 @@
 
 [Тема 2. Файлы в UNIX](Lectures/2.Files)
 
+[Тема 3. Процессы](Lectures/3.Processes)
+
+[Тема 4. Сигналы](Lectures/4.Signals)
+
 
 ## Лабораторные работы
 
