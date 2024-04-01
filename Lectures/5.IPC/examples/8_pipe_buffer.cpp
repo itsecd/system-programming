@@ -2,15 +2,13 @@
 #include "check.hpp"
 #include <memory.h>
 #include <wait.h>
+#include <limits.h>
 
-const size_t PIPE_BUFFER_SIZE = 64*1024;
+const size_t BIG_MESSAGE_SIZE = PIPE_BUF + 1;
+const size_t SMALL_MESSAGE_SIZE = PIPE_BUF - 1;
 
-
-const size_t BIG_MESSAGE_SIZE = PIPE_BUFFER_SIZE*4;
-const size_t SMALL_MESSAGE_SIZE = 128;
-
-const size_t MESSAGES_COUNT = 4;
-const size_t WRITERS_COUNT = 2;
+const size_t MESSAGES_COUNT = 10;
+const size_t WRITERS_COUNT = 4;
 
 
 void writer(int write_fd, size_t msg_size, char value){
@@ -29,7 +27,7 @@ void reader(int read_fd, size_t msg_size){
 
         size_t current_pos = 0;
         while(current_pos != msg_size)
-            current_pos += check(read(read_fd, buffer+current_pos, msg_size));
+            current_pos += check(read(read_fd, buffer+current_pos, msg_size-current_pos));
         bool ok = true;
         for(size_t j = 1; j < msg_size; ++j){
             if(buffer[0] != buffer[j]) {
@@ -75,7 +73,7 @@ int main()
         }
     }
     reader(read_fd, BIG_MESSAGE_SIZE);
-    while(check_except(wait(NULL), ECHILD) >= 0) {}    // WAIT for all childs
+    while(check_except(wait(NULL), ECHILD) >= 0) {}    // WAIT for all children
 
 }
 

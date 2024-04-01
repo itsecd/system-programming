@@ -27,8 +27,8 @@ void guarded_dealloc(void* ptr, size_t size){
 
 const size_t SIZE = 16;
 void common(){
-    char* buf = (char*)malloc(SIZE);
-    char* buf2 = (char*)malloc(SIZE);
+    char* buf = (char*)calloc(SIZE, 1);
+    char* buf2 = (char*)calloc(SIZE, 1);
     scanf("%s", buf);
     printf("%s\n", buf);
     printf("%s\n", buf2);
@@ -51,8 +51,11 @@ void guarded(){
 
 
 
-int main(){
-
-    guarded();
-    //common();
+int main(int argc, char** argv){
+    if(argc > 1) {
+        puts("Using guard pages");
+        guarded();
+    }
+    else
+        common();
 }
