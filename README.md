@@ -39,6 +39,13 @@
 
 [Тема 4. Сигналы](Lectures/4.Signals)
 
+[Тема 5. Межпроцессное взаимодействие](Lectures/5.IPC)
+
+[Тема 6. Потоки](Lectures/6.Threads)
+
+[Тема 7. Синхронизация](Lectures/7.Synchronization)
+
+[Тема 8. Сетевое взаимодействие](Lectures/8.Network)
 
 ## Лабораторные работы
 
