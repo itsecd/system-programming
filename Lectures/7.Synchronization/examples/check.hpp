@@ -74,7 +74,7 @@ namespace DO_NOT_USE_DIRECTLY {
 
 //USE ONLY THIS MACRO
 //Example: int fd = check(open("file", O_CREAT|O_RDWR, S_IRWXU));
-#define check(x) DO_NOT_USE_DIRECTLY::xcheck<false>(x, __FILE__, __LINE__ )
+#define check(x) DO_NOT_USE_DIRECTLY::xcheck(x, __FILE__, __LINE__ )
 #define check_result(x) DO_NOT_USE_DIRECTLY::xcheck<true>(x, __FILE__, __LINE__ )
 #define check_except(x,...) DO_NOT_USE_DIRECTLY::xcheck_except(x, __FILE__, __LINE__, __VA_ARGS__)
 

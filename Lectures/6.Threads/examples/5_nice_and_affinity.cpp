@@ -1,8 +1,8 @@
 #include "common.hpp"
 #include <pthread.h>
 #include <signal.h>
-#include <iostream>
 #include <sys/resource.h>
+#include <vector>
 
 const long long MAX_VALUE = 1000000000000;
 

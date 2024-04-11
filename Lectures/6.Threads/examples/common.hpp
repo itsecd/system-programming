@@ -6,6 +6,8 @@
 #define LECTURE6_COMMON_HPP
 #include <time.h>
 #include "check.hpp"
+#include <iostream>
+#include <iomanip>
 
 inline timespec get_current_time(){
     timespec t{};

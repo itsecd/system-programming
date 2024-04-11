@@ -1,5 +1,7 @@
 #include "common.hpp"
 #include <iostream>
+#include <iomanip>
+
 ScopedTimer::ScopedTimer(std::string_view name): name(name), start_time(clock_t::now()){}
 
 ScopedTimer::~ScopedTimer() {

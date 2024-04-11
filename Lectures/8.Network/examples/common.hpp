@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <iostream>
+#include <algorithm>
 #include "check.hpp"
 
 constexpr unsigned short SERVER_PORT = 60002;

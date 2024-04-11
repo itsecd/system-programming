@@ -9,14 +9,14 @@
 #include <string>
 namespace DO_NOT_USE_DIRECTLY {
     [[noreturn]]
-	inline void error(const char* file, int line) {
-		auto tmp = errno;//fprintf may fail, so we preserve errno
-		fprintf(stderr, "%s (line %d) :", file, line);
+    inline void error(const char* file, int line) {
+        auto tmp = errno;//fprintf may fail, so we preserve errno
+        fprintf(stderr, "%s (line %d) :", file, line);
         fflush(stderr);
-		errno = tmp;
-		perror(nullptr);
-		exit(EXIT_FAILURE);
-	}
+        errno = tmp;
+        perror(nullptr);
+        exit(EXIT_FAILURE);
+    }
 
     [[noreturn]]
     inline void error(int errcode, const char* file, int line) {
@@ -40,11 +40,11 @@ namespace DO_NOT_USE_DIRECTLY {
         return value;
     }
 
-	template<typename T>
-	inline T* xcheck(T* p, const char* file, int line) {
-		if (p == nullptr)  error(file, line);
-		return p;
-	}
+    template<typename T>
+    inline T* xcheck(T* p, const char* file, int line) {
+        if (p == nullptr)  error(file, line);
+        return p;
+    }
 
     inline bool is_error_allowed(int allowed_code){
         return errno==allowed_code;

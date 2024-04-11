@@ -28,7 +28,7 @@ void writer(mqd_t fd){
         read_message(m);
 
         while(check_except(
-                      mq_timedsend(fd, (char*)&m, sizeof m, NULL, &t)
+                      mq_timedsend(fd, (char*)&m, sizeof m, 0, &t)
               , ETIMEDOUT) < 0){
             if(waitpid(0, NULL, WNOHANG) != 0)
                 exit(0);
