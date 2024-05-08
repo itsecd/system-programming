@@ -1,0 +1,6 @@
+project(lecture12)
+
+add_executable(1_signal_steal 1_signal_steal.cpp)
+add_executable(2_hardware_breakpoint 2_hardware_breakpoint.cpp)
+add_executable(3_software_breakpoint 3_software_breakpoint.cpp)
+add_executable(4_nodebug 4_nodebug.cpp)
