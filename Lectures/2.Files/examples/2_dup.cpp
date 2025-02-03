@@ -22,13 +22,13 @@ int main(int argc, char* argv[]) {
 	int fd2 = check(dup2(fd, 10)); //you can use 2 to retarget STDOUT to the file
 
 	printf("Opened %s and duplicated the descriptor\n", FILENAME);
-	printf("Position of the 1st descriptor:%d\n", check(lseek(fd, 0, SEEK_CUR)));
-	printf("Position of the 2nd descriptor:%d\n", check(lseek(fd2, 0, SEEK_CUR)));
+	printf("Position of the 1st descriptor:%ld\n", check(lseek(fd, 0, SEEK_CUR)));
+	printf("Position of the 2nd descriptor:%ld\n", check(lseek(fd2, 0, SEEK_CUR)));
 
 	puts("Write 20 bytes through the 1st descriptor");
 	check(write(fd, msg, sizeof msg));
-	printf("Position of the 1st descriptor:%d\n", check(lseek(fd, 0, SEEK_CUR)));
-	printf("Position of the 2nd descriptor:%d\n", check(lseek(fd2, 0, SEEK_CUR)));
+	printf("Position of the 1st descriptor:%ld\n", check(lseek(fd, 0, SEEK_CUR)));
+	printf("Position of the 2nd descriptor:%ld\n", check(lseek(fd2, 0, SEEK_CUR)));
 
 	close(fd);
 	close(fd2);
@@ -38,11 +38,11 @@ int main(int argc, char* argv[]) {
 	fd2 = check(open(FILENAME, O_WRONLY)); //see man
 
 	printf("\nOpened %s twice\n", FILENAME);
-	printf("Position of the 1st descriptor:%d\n", check(lseek(fd, 0, SEEK_CUR)));
-	printf("Position of the 2nd descriptor:%d\n", check(lseek(fd2, 0, SEEK_CUR)));
+	printf("Position of the 1st descriptor:%ld\n", check(lseek(fd, 0, SEEK_CUR)));
+	printf("Position of the 2nd descriptor:%ld\n", check(lseek(fd2, 0, SEEK_CUR)));
 
 	printf("Write 20 bytes through the 1st descriptor\n");
 	check(write(fd, msg, sizeof msg));
-	printf("Position of the 1st descriptor:%d\n", check(lseek(fd, 0, SEEK_CUR)));
-	printf("Position of the 2nd descriptor:%d\n", check(lseek(fd2, 0, SEEK_CUR)));
+	printf("Position of the 1st descriptor:%ld\n", check(lseek(fd, 0, SEEK_CUR)));
+	printf("Position of the 2nd descriptor:%ld\n", check(lseek(fd2, 0, SEEK_CUR)));
 }

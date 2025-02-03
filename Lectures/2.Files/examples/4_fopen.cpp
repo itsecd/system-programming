@@ -36,7 +36,7 @@ void syscalls(const char* filename) {
 /*
 *  C and C++ use internal buffers to speed up the I/O operations
 *  This however can lead to a data loss if the process unexpectedly dies (by a signal, for example)
-*  This can be avoided by directly using  the syscalls (sacrificing some performance and convinience)
+*  This can be avoided by directly using  the syscalls (sacrificing some performance and convenience)
 */
 
 char cwdbuffer[4096];

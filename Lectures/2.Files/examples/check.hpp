@@ -21,7 +21,7 @@ namespace DO_NOT_USE_DIRECTLY {
     template<typename T>
     inline T xcheck(T value, const char* file, int line){
         static_assert(std::is_integral_v<T>, "Value must be an integral type");
-        if (value < 0) error(file, line);
+        if (value == -1) error(file, line);
         return value;
     }
 

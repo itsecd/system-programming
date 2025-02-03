@@ -46,7 +46,7 @@ int main(){
     long buf;
     check(read(fd, &buf, sizeof buf));            // read will block until alarm
 
-    fputs("Alarm rang at:", stdout);
     check(ioctl(fd, RTC_RD_TIME, &time));
+    fputs("Alarm rang at:", stdout);
     print_time(time);
 }

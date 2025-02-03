@@ -21,7 +21,7 @@ int main() {
 		}
 		check(result);// if not EAGAIN, kill the process as usual
 	}
-    else{
+    else {
         char buf[33]{}; // enough for a number
         snprintf(buf, 32, "%d", getpid());
         check(ftruncate(fd, 0));

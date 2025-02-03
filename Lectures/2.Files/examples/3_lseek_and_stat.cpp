@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 
 	char buf[1024]{}; //all zero
 	ssize_t read_size = check(read(fd, buf, sizeof buf));
-	printf("Read %d bytes from file. Result: %s\n", read_size, buf);
+	printf("Read %ld bytes from file. Result: %s\n", read_size, buf);
 
 	puts("Resetting file position to start\n");
 	check(lseek(fd, 0, SEEK_SET));
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 	check(lseek(fd, 0, SEEK_SET));
 
 	read_size = check(read(fd, buf, sizeof buf));
-	printf("Read %d bytes from file. Result: %s\n", read_size, buf);
+	printf("Read %ld bytes from file. Result: %s\n", read_size, buf);
 
 	struct stat s {};
 	puts("Checking file stats\n");

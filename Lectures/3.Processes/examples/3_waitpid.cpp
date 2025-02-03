@@ -10,7 +10,7 @@ int spawn_child(bool use_normal_exit) {
 		return id;	//we are in the parent process, return child's PID
 	printf("Child %d >> I'm born!\n", getpid());
 
-	sleep(2+!use_normal_exit); //simulate some work for 5 sec
+	sleep(2+!use_normal_exit); //simulate some work for 2-3 sec
 	
 	printf("Child %d >> I'm done!\n", getpid());
     if(use_normal_exit)

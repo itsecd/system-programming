@@ -3,7 +3,7 @@
 #include "check.hpp"
 #include <stdlib.h>
 
-void handle_event(inotify_event *event) {
+void handle_one_event(inotify_event *event) {
 
     if(event->len)
         printf("%s", event->name);
@@ -48,8 +48,8 @@ void handle_events(char* buffer, ssize_t size){
     auto end = buffer + size;
     char* cur = buffer;
     while(cur < end){
-        inotify_event* event = (inotify_event*)cur;
-        handle_event(event);
+        auto* event = (inotify_event*)cur;
+        handle_one_event(event);
         cur += sizeof(inotify_event)+event->len;
     }
 
