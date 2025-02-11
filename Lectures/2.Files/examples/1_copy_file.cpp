@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 		exit(2);
 	}
 
-	int to_fd = open(to, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU); //create file if not exists, else truncate
+	int to_fd = open(to, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR|S_IWUSR); //create file if not exists, else truncate
 	if (to_fd == -1) {
 		perror("Failed to create the destination file ");
 		exit(3);
