@@ -15,7 +15,7 @@ void sudden_exit() {
 }
 
 void cpp(const char* filename) {
-	std::fstream f{ filename, std::fstream::trunc };
+	std::fstream f{ filename, std::fstream::out|std::fstream::trunc };
 	f.exceptions(std::fstream::failbit|std::fstream::badbit);//throw if failed to open the file
 	f << MESSAGE;
     sudden_exit();

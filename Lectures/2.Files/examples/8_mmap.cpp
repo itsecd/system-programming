@@ -79,5 +79,5 @@ int main(){
     std::cout << "Created file "<< fname << std::endl;
 
     read_regular(fname);
-    mmap_work(fname);
+    read_mmap(fname);
 }
