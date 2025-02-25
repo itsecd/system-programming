@@ -13,7 +13,6 @@ void* guarded_alloc(size_t size){
     check(mprotect(result, alloc_size - PAGE_SIZE, PROT_READ|PROT_WRITE));  // change protection for all pages except last;
 
     result = (char*)result+alloc_size - PAGE_SIZE - size;   // return pointer to area adjacent to the guard page
-    memset(result, 0, size);
     return result;
 };
 

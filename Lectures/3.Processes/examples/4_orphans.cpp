@@ -17,7 +17,7 @@ int main(){
             sleep(1);
         }
         puts("Child >> I'm an orphan! (╥﹏╥)");
-        printf("Child >> I'm was adoped by %d\n", getppid());
+        printf("Child >> I'm was adopted by %d\n", getppid());
     }
     else{
         sleep(2);

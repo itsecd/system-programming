@@ -40,7 +40,7 @@ int main(){
         printf("Parent >> Current RLIMIT_NPROC value:  %ld\n", limit.rlim_cur);
 
         puts("Parent >> Trying to fork again");
-        auto pid = check(fork());
+        auto pid = fork();
         if(pid == 0) exit(0);
         if(pid < 0) puts("Parent >> Fork failed");
         if(pid > 0) puts("Parent >> Fork succeeded");

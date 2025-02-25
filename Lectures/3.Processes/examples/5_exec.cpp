@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
 
     auto path = argv[1];
 
-	printf("Currently I am Example, but soon I will become %s\n", path);
+	printf("Currently I am 5_exec, but soon I will become %s\n", path);
     char** args = new char*[argc];
     args[0] = path;
     memcpy( &args[1],&argv[2], (argc-2)*sizeof(char*)); // copy arguments from 2nd to last
