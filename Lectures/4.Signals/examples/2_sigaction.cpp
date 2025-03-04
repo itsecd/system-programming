@@ -5,7 +5,7 @@
 volatile sig_atomic_t last_sig;
 
 void sig_handler(int signo) {
-    //can not call printf here because it’s not reentrant
+    //better not call printf here because it’s not reentrant
     last_sig = signo;
 }
 
@@ -34,7 +34,8 @@ void child() {
     }
 
 }
-bool exists(pid_t p) {
+
+bool process_exists(pid_t p) {
     if(kill(p, 0) == -1 && errno == ESRCH)
         return false;
     return true;
@@ -47,7 +48,7 @@ void try_kill(pid_t p, int sig) {
     else
         check(sigqueue(p, sig, sigval{ 1024 }));
     sleep(1);
-    if (!exists(p)) {
+    if (!process_exists(p)) {
         printf("Отец >> Убил наконец...\n");
         exit(EXIT_SUCCESS);
     }

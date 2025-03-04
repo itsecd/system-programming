@@ -2,22 +2,20 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
-
-
-const char msg[] = "---- SIGABRT handler\n";
-
-void handler(int sig){
-    write(STDOUT_FILENO, msg, sizeof msg -1 );
-}
+#include "common.h"
 
 int main(int argc, char**){
     struct sigaction s{};
-    s.sa_handler = handler;
+    s.sa_handler = default_handler;
     check(sigaction(SIGABRT, &s, NULL));
+    puts("SIGABRT handler is set\n");
 
-    kill(getpid(), SIGABRT);
-    kill(getpid(), SIGABRT);
-    kill(getpid(), SIGABRT);
+    for(int i = 0; i < 3; ++i) {
+        puts("Sending SIGABRT to self");
+        kill(getpid(), SIGABRT);
+    }
 
+    puts("\nCalling abort()");
     abort();
+    puts("you won't see this");
 }

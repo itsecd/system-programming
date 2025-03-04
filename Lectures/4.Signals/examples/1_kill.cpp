@@ -26,9 +26,9 @@ void parent(int child_pid){
 
     int status;
     wait(&status);
-    printf("Was child process killed? %s. Signal description: %s, (signal %d)",
+    printf("Was child process killed? %s. Signal %d (%s)",
            WIFSIGNALED(status) ? "Yes" : "No",
-           strsignal(WTERMSIG(status)), WTERMSIG(status));
+           WTERMSIG(status), strsignal(WTERMSIG(status)), WTERMSIG(status));
 
 }
 
