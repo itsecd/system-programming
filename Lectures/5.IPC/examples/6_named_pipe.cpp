@@ -1,7 +1,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "common.hpp"
-#include <iostream>
 #include <sys/stat.h>
 
 

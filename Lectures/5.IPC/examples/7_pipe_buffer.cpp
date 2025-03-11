@@ -28,6 +28,7 @@ void reader(int read_fd, size_t msg_size){
         size_t current_pos = 0;
         while(current_pos != msg_size)
             current_pos += check(read(read_fd, buffer+current_pos, msg_size-current_pos));
+
         bool ok = true;
         for(size_t j = 1; j < msg_size; ++j){
             if(buffer[0] != buffer[j]) {
@@ -61,7 +62,7 @@ int main()
         }
     }
     reader(read_fd, SMALL_MESSAGE_SIZE);
-    while(check_except(wait(NULL), ECHILD) >= 0) {}    // WAIT for all childs
+    while(check_except(wait(NULL), ECHILD) >= 0) {}    // WAIT for all children
 
 
     puts("\n============Big messages==============:");

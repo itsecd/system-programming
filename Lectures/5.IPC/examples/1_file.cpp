@@ -1,9 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
-#include <signal.h>
 #include "common.hpp"
 #include <wait.h>
-#include <iostream>
 #include <sys/stat.h>
 #include <sys/file.h>
 
@@ -17,19 +15,19 @@ void reader(int fd, pid_t writer_pid){
     timespec t {.tv_sec = 0, .tv_nsec = 100000}; // 10 msec
 
     while(1) {
+
         do{
             if (getppid() != writer_pid)
                 exit(-1);
             nanosleep(&t, NULL);
-        }
-        while(check_except(flock(fd, LOCK_EX|LOCK_NB), EWOULDBLOCK) != 0); // LOCK
+        }while(check_except(flock(fd, LOCK_EX|LOCK_NB), EWOULDBLOCK) != 0); // LOCK
 
         if(!is_file_empty(fd)) {
             Message m{};
             check(lseek(fd, SEEK_SET, 0));
             check(read(fd, &m, sizeof m));
             COUT << m << std::endl;
-            ftruncate(fd, 0);
+            check(ftruncate(fd, 0));
         }
 
         flock(fd, LOCK_UN);                                               // UNLOCK

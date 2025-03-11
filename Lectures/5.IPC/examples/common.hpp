@@ -1,7 +1,3 @@
-//
-// Created by alexey on 09.03.24.
-//
-
 #ifndef LECTURE5_MESSAGE_HPP
 #define LECTURE5_MESSAGE_HPP
 
@@ -22,7 +18,7 @@ inline std::ostream&  operator << (std::ostream& s, const Message& m){
 }
 
 inline void read_message( Message& m){
-
+    constexpr auto max_size = std::numeric_limits<std::streamsize>::max();
 
     while(true){
         COUT << "Value of X: "<<std::flush;
@@ -30,9 +26,8 @@ inline void read_message( Message& m){
         if(std::cin) break;
         if(std::cin.bad() || std::cin.eof()) exit(-2);
         std::cin.clear();
-        std::cin.ignore(1024, '\n');
+        std::cin.ignore(max_size, '\n');
     }
-
 
     std::string str;
     COUT << "Value of MSG:"<<std::flush;
@@ -50,14 +45,5 @@ inline void ask_continue(){
     if( tolower(str[0]) != 'y') exit(0);
 }
 
-inline void disable_zombies(){
-    struct sigaction s{};
-    s.sa_handler = SIG_IGN;
-    check(sigaction(SIGCHLD, &s, nullptr));
-}
-
-inline bool is_process_exists(pid_t pid){
-    return kill(pid, 0) == 0 || errno != ESRCH;
-}
 
 #endif //LECTURE5_MESSAGE_HPP

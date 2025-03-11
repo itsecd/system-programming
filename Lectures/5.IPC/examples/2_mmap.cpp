@@ -1,9 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
-#include <signal.h>
 #include "common.hpp"
 #include <wait.h>
-#include <iostream>
 #include <sys/mman.h>
 #include <memory.h>
 

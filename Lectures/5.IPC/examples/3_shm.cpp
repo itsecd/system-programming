@@ -1,11 +1,20 @@
 #include <unistd.h>
 #include <fcntl.h>
-#include <signal.h>
 #include "common.hpp"
-#include <wait.h>
-#include <iostream>
 #include <sys/mman.h>
 #include <memory.h>
+
+inline void disable_zombies(){
+    struct sigaction s{};
+    s.sa_handler = SIG_IGN;
+    check(sigaction(SIGCHLD, &s, nullptr));
+}
+
+inline bool process_exists(pid_t pid){
+    if(kill(pid, 0) ==0)
+        return true; // process exists (either alive or a zombie)
+    return errno != ESRCH; // if errno==ESRCH, there is no such process
+}
 
 void reader(const volatile Message* m, pid_t writer_pid){
     sigset_t s;
@@ -16,7 +25,7 @@ void reader(const volatile Message* m, pid_t writer_pid){
 
     while(1) {
         while (check_except(sigtimedwait(&s, NULL, &t), EAGAIN) < 0) {
-            if (getppid() != writer_pid)
+            if (!process_exists(writer_pid))
                 exit(-1);
         }
 
@@ -44,7 +53,7 @@ void writer(volatile Message* m, pid_t reader_pid){
         kill(reader_pid, SIGUSR1);
 
         while (check_except(sigtimedwait(&s, NULL, &t), EAGAIN) < 0) {
-            if (waitpid(reader_pid, 0, WNOHANG) != 0)
+            if (!process_exists(reader_pid))
                 exit(-1);
         }
 
@@ -68,6 +77,8 @@ int main(){
     sigaddset(&s, SIGUSR1);
     sigaddset(&s, SIGUSR2);
     check(sigprocmask(SIG_BLOCK, &s, NULL));
+
+    disable_zombies();
 
 
     int writer_pid = getpid();
