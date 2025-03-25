@@ -3,51 +3,50 @@
 #include <string_view>
 #include <string.h>
 #include <vector>
+#include <syncstream>
+
+#define COUT std::osyncstream(std::cout)
 
 struct NamedObject{
-    const char* const name;
-    int value;
+    const std::string name;
+    int value = 0;
+
+    explicit NamedObject(std::string_view object_name): name(object_name){
+        auto time = get_current_time();
+        COUT << "Object "<<std::quoted(name) << " created at "<< time << std::endl;
+    }
+
+    ~NamedObject(){
+        auto time = get_current_time();
+        COUT << "Object "<<std::quoted(name) << " destroyed at "<< time
+                  << " with value "<< value << std::endl;
+    }
 };
 
-NamedObject* global;
-pthread_key_t thread_global_key;
+NamedObject global = NamedObject{"Global"};
+pthread_key_t thread_local_key;
 
-NamedObject* make_named_object(const char* name){
-    auto name_size = strlen(name)+1;
-    char * name_copy = new char [name_size];
-    memcpy(name_copy, name, name_size);
-    auto result = new NamedObject{name_copy, 0};
-    auto time = get_current_time();
-    std::cout << "Object "<<std::quoted(result->name) << " created at "<< time << std::endl;
-    return result;
+
+void destroy_named_object(void* obj){
+    delete (NamedObject*)obj;
 }
 
-void destroy_named_object(void* obj_){
-    if(!obj_) return;
-    auto obj = (NamedObject*)obj_;
-    auto time = get_current_time();
-    std::cout << "Object "<<std::quoted(obj->name) << " destroyed at "<< time
-              << " with value "<< obj->value << std::endl;
-    delete[] obj->name;
-    delete obj;
-}
-
-NamedObject* get_thread_global(){
-    NamedObject* thread_global = (NamedObject*)pthread_getspecific(thread_global_key);
-    if( thread_global == nullptr)
+NamedObject* get_thread_local(){
+    auto thread_local_obj = (NamedObject*)pthread_getspecific(thread_local_key);
+    if(thread_local_obj == nullptr)
     {
-        thread_global = make_named_object("Thread-local");
-        check_result(pthread_setspecific(thread_global_key, thread_global));
+        thread_local_obj = new NamedObject("Thread-local");
+        check_result(pthread_setspecific(thread_local_key, thread_local_obj));
     }
-    return thread_global;
+    return thread_local_obj;
 }
 
 void* thread_fn(void* arg_){
-
-    auto thread_global = get_thread_global();
     int* arg = (int*)arg_;
-    thread_global->value = *arg;
-    global->value = *arg;
+    auto thread_global = get_thread_local();
+
+    ++thread_global->value;
+    ++global.value;
     timespec ts{.tv_sec = 0, .tv_nsec = 300000000};
     nanosleep(&ts, nullptr);
     return nullptr;
@@ -58,17 +57,14 @@ void* thread_fn(void* arg_){
 
 int main(){
 
-    check_result(pthread_key_create(&thread_global_key, destroy_named_object));
-    global = make_named_object("Global");
+    check_result(pthread_key_create(&thread_local_key, destroy_named_object));
 
-    auto thread_global = get_thread_global();
 
-    global->value = -1;
-    thread_global->value  = -1;
+    global.value = -1;
 
     size_t thread_count;
     while(true){
-        std::cout << "Threads count:";
+        COUT << "Threads count:";
         std::cin >> thread_count;
         if(std::cin.good()) break;
     }
@@ -77,12 +73,11 @@ int main(){
     for(size_t i = 0; i < thread_count; ++i)
     {
         pthread_t tid;
-        check_result(pthread_create(&tid, nullptr, thread_fn, new int(i)));
+        check_result(pthread_create(&tid, nullptr, thread_fn, nullptr));
         threads.push_back(tid);
     }
 
     for(const auto& tid: threads)
         check_result(pthread_join(tid, nullptr));
 
-    destroy_named_object(global);
 }

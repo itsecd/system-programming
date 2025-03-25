@@ -8,24 +8,27 @@ const long long MAX_VALUE = 1000000000000;
 
 struct Arg{
     int nice_value;
-    volatile double value;
+    volatile unsigned long long value;
 };
+
+volatile bool start = false;
+volatile bool stop = false;
 
 void* thread_main(void* arg_){
 
-
+    while(!start){}
     auto arg = (Arg*) arg_;
     auto current = nice(0);
     auto delta = arg->nice_value - current ;
     check(nice(delta));
-    check_result(pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nullptr));
-    for(arg->value = 0; arg->value < MAX_VALUE; ++(arg->value));
+    while(!stop) ++(arg->value);
+//    for(arg->value = 0; arg->value < MAX_VALUE; ++(arg->value));
 
     return nullptr;
 }
 
 const size_t THREAD_COUNT = 16;
-
+static_assert(THREAD_COUNT < 20);
 int main(){
 
     rlimit nice_limit{.rlim_cur = 0, .rlim_max = 0};
@@ -34,7 +37,7 @@ int main(){
     cpu_set_t  set;
     CPU_ZERO(&set);
     CPU_SET(0, &set);
-    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &set ); // use 1-st core only
+    check(pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &set )); // use 1-st core only
 
     std::vector<Arg> args;
     std::vector<pthread_t> threads;
@@ -47,12 +50,13 @@ int main(){
         args[i].value = 0;
         check_result(pthread_create(&threads[i], nullptr, thread_main, &args[i]));
     }
+    start = true;
     timespec sleep_time{.tv_sec = 5, .tv_nsec = 0};
     nanosleep(&sleep_time, nullptr);
 
-    for(const auto& tid: threads)
-        check_result(pthread_cancel(tid));
-
+//    for(const auto& tid: threads)
+//        check_result(pthread_cancel(tid));
+    stop = true;
     for(const auto& tid: threads)
         check_result(pthread_join(tid, nullptr));
 
