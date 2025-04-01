@@ -5,34 +5,44 @@
 
 
 void* A(void*){
+    COUT << "A begin"<<std::endl;
     timespec t{.tv_nsec = 300000};
     nanosleep(&t,nullptr);
+    COUT << "A end"<<std::endl;
     return nullptr;
 }
 
 
 void* B(void*){
+    COUT << "B begin"<<std::endl;
     timespec t{.tv_nsec = 600000};
     nanosleep(&t,nullptr);
+    COUT << "B end"<<std::endl;
     return nullptr;
 }
 
 void* C(void*){
+    COUT << "C begin"<<std::endl;
     timespec t{.tv_nsec = 100000};
     nanosleep(&t,nullptr);
+    COUT << "C end"<<std::endl;
     return nullptr;
 }
 
 
 void* D(void*){
+    COUT << "D begin"<<std::endl;
     timespec t{.tv_nsec = 400000};
     nanosleep(&t,nullptr);
+    COUT << "D end"<<std::endl;
     return nullptr;
 }
 
 void* E(void*){
+    COUT << "E begin"<<std::endl;
     timespec t{.tv_nsec = 200000};
     nanosleep(&t,nullptr);
+    COUT << "E end"<<std::endl;
     return nullptr;
 }
 
@@ -91,10 +101,12 @@ int main(){
         ScopedTimer _{"Sequential"};
         sequential();
     }
+    COUT << std::endl;
     {
         ScopedTimer _{"Parallel"};
         parallel_join();
     }
+    COUT << std::endl;
     {
         ScopedTimer _{"Parallel with barrier"};
         parallel_barrier();

@@ -1,7 +1,7 @@
 #include "common.hpp"
 
 const size_t CONSUMERS_COUNT = 8;
-const size_t CONSUMER_LIMIT =100000;
+const size_t VALUES_PER_CONSUMER =100000;
 
 int value;
 bool ready;
@@ -12,7 +12,7 @@ pthread_spinlock_t spin;
 void* spin_consume_fn(void* arg){
     size_t counter = 0;
     size_t result = 0;
-    while(counter < CONSUMER_LIMIT) {
+    while(counter < VALUES_PER_CONSUMER) {
         check_result(pthread_spin_lock(&spin));
         if(ready)
         {
@@ -28,7 +28,7 @@ void* spin_consume_fn(void* arg){
 
 void* spin_produce_fn(void*){
     size_t counter = 0;
-    while(counter < CONSUMERS_COUNT*CONSUMER_LIMIT) {
+    while(counter < CONSUMERS_COUNT * VALUES_PER_CONSUMER) {
         check_result(pthread_spin_lock(&spin));
         if(!ready)
         {
@@ -44,7 +44,7 @@ void* spin_produce_fn(void*){
 void* mutex_consume_fn(void* arg){
     size_t counter = 0;
     size_t result = 0;
-    while(counter < CONSUMER_LIMIT) {
+    while(counter < VALUES_PER_CONSUMER) {
         check_result(pthread_mutex_lock(&mutex));
         if(ready)
         {
@@ -60,7 +60,7 @@ void* mutex_consume_fn(void* arg){
 
 void* mutex_produce_fn(void*){
     size_t counter = 0;
-    while(counter < CONSUMERS_COUNT*CONSUMER_LIMIT) {
+    while(counter < CONSUMERS_COUNT * VALUES_PER_CONSUMER) {
         check_result(pthread_mutex_lock(&mutex));
         if(!ready)
         {

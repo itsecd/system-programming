@@ -9,6 +9,11 @@
 #include <chrono>
 #include <string_view>
 #include <vector>
+
+#include <syncstream>
+
+#define COUT std::osyncstream(std::cout)
+
 struct ScopedTimer{
     using clock_t = std::chrono::high_resolution_clock;
     using duration_t = std::chrono::duration<double, std::milli>;

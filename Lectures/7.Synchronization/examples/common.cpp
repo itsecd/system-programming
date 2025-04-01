@@ -8,12 +8,12 @@ ScopedTimer::~ScopedTimer() {
     auto end_time = clock_t::now();
     duration_t elapsed_time = end_time - start_time;
     if(!name.empty()){
-        std::cout << std::quoted(name) << " elapsed time: ";
+        COUT << std::quoted(name) << " elapsed time: ";
     }
     else{
-        std::cout << "Elapsed time: ";
+        COUT << "Elapsed time: ";
     }
-    std::cout << elapsed_time << std::endl;
+    COUT << elapsed_time << std::endl;
 }
 
 std::vector<pthread_t> spawn_threads(size_t size, void*(*fn)(void*)){
