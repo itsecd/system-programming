@@ -32,59 +32,77 @@ uid_t get_some_uid(){
 
 
 int main(int argc, char** argv){
-    std::cout << "Run this program with and without sudo, run with set-user-id flag, and compare the output."<< std::endl;
+    std::cout << "Run this program with and without sudo and with the set-user-id flag set, and compare the output."<< std::endl;
+
+
+
     std::cout << std::endl << "Initial IDs "<< std::endl;
     std::cout << current_ids << std::endl<< std::endl;
-    uid_t nonexistent = get_nonexistent_uid();
+
+    uid_t nonexistent_uid = get_nonexistent_uid();
     uid_t current = get_current_user_id();
-    uid_t real = get_some_uid();
+    uid_t existing_uid = get_some_uid();
+
+    uid_t old_effective_uid;
+    {
+        uid_t r,e, s;
+        check(getresuid(&r, &e, &s));
+        if(!r && !e && !s && ! current ){
+            std::cerr << "Do not run this program as root directly";
+            return 0;
+        }
+        old_effective_uid = e;
+    }
 
     std::cout << "Setting eUID to " << current;
     if(check_except(seteuid(current), EPERM))
         std::cout << "FAILED";
     std::cout << std::endl << current_ids << std::endl<< std::endl;
 
-    std::cout << "Resetting eUID to UID ";
-    if(check_except(seteuid(getuid()), EPERM))
+    std::cout << "Resetting eUID ";
+    if(check_except(seteuid(old_effective_uid), EPERM))
         std::cout << "FAILED";
     std::cout << std::endl << current_ids << std::endl<< std::endl;
 
-    std::cout << "Setting eUID to "<<real
+    std::cout << "Setting eUID to " << existing_uid
               << " which IS listed in passwd ";
-    if(check_except(seteuid(real), EPERM))
+    if(check_except(seteuid(existing_uid), EPERM))
         std::cout << "FAILED";
     std::cout << std::endl << current_ids << std::endl<< std::endl;
 
-    std::cout << "Resetting eUID to UID ";
-    if(check_except(seteuid(getuid()), EPERM))
+    std::cout << "Resetting eUID";
+    if(check_except(seteuid(old_effective_uid), EPERM))
         std::cout << "FAILED";
     std::cout << std::endl << current_ids << std::endl<< std::endl;
 
-    std::cout << "Setting eUID to "<<nonexistent
+    std::cout << "Setting eUID to " << nonexistent_uid
                         << " which IS NOT listed in passwd ";
-    if(check_except(seteuid(nonexistent), EPERM, EINVAL))
+    if(check_except(seteuid(nonexistent_uid), EPERM, EINVAL))
         std::cout << "FAILED";
     std::cout << std::endl << current_ids << std::endl<< std::endl;
 
-    std::cout << "Resetting eUID to UID ";
-    if(check_except(seteuid(getuid()), EPERM))
+    std::cout << "Resetting eUID ";
+    if(check_except(seteuid(old_effective_uid), EPERM))
         std::cout << "FAILED";
     std::cout << std::endl << current_ids << std::endl<< std::endl;
 
-retry:
-    std::cout << "Setting eUID to " << current << " using setuid() " ;
-    if(check_except(setuid(current), EPERM))
-        std::cout << "FAILED";
-    std::cout << std::endl << current_ids << std::endl<< std::endl;
+    int i = 0;
+    while(i++ < 2) {
+        std::cout << "Setting eUID to " << current << " using setuid() ";
+        if (check_except(setuid(current), EPERM))
+            std::cout << "FAILED";
+        std::cout << std::endl << current_ids << std::endl << std::endl;
 
-    std::cout << "Setting eUID to 0 (root) " <<std::endl;
-    if(check_except(seteuid(0), EPERM)){
-        std::cout << "Failed to regain root privileges" << std::endl;
-        std::cout <<  current_ids << std::endl<< std::endl;
+        std::cout << "Setting eUID to 0 (root) " << std::endl;
+        if (check_except(seteuid(0), EPERM)) {
+            std::cout << "Failed to regain root privileges" << std::endl;
+            std::cout << current_ids << std::endl << std::endl;
+            break;
+        } else {
+            std::cout << "Regained the root privileges (possibly because of saved UID) " << std::endl;
+            std::cout << current_ids << std::endl << std::endl;
+        }
     }
-    else{
-        std::cout << "Regained the root privileges (possibly because of saved UID) " << std::endl;
-        std::cout <<  current_ids << std::endl<< std::endl;
-        goto retry;  // :)
-    }
+    if(i >= 3)
+        std::cerr << "Failed to renounce privileges. Are you running this program directly as a root?";
 }

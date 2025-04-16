@@ -11,7 +11,7 @@
 inline std::ostream& current_ids(std::ostream& s){
     uid_t rid, eid, sid;
     check(getresuid(&rid, &eid, &sid));
-    return s << "(Real UID="<<rid << " Effective UID=" << eid << " Saved UID=" <<sid <<")";
+    return s << "(rUID="<<rid << " eUID=" << eid << " sUID=" <<sid <<")";
 }
 
 #endif //LECTURE9_COMMON_H
