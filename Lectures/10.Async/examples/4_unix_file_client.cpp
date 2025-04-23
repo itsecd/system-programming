@@ -16,7 +16,7 @@ int get_fd(){
     strncpy(addr.sun_path, UNIX_SOCKET_NAME, sizeof UNIX_SOCKET_NAME);
     check(connect(sockfd, (sockaddr*)&addr, sizeof addr)); //connecting to an existing socket
     authenticate(sockfd);
-    auto fd = get_ancillary_info<int, SCM_RIGHTS>(sockfd);
+    auto fd = get_ancillary_info< SCM_RIGHTS>(sockfd);
     return fd ? *fd : -1;
 }
 

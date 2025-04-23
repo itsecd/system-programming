@@ -25,7 +25,7 @@ void send_file(int sockfd, int filefd){
 
 bool authenticate(int sockfd){
     check(send(sockfd, &sockfd, 1, 0)); //send 1 byte to indicate that we're ready to receive creds
-    auto cred = get_ancillary_info<ucred, SCM_CREDENTIALS>(sockfd); //get auth info
+    auto cred = get_ancillary_info< SCM_CREDENTIALS>(sockfd); //get auth info
 
     if(cred.has_value()){
         std::cout << "Got request from UID " << cred->uid<< std::endl;

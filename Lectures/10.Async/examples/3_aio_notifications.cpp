@@ -11,7 +11,7 @@ struct ThreadArgs{
     char* buffer;
 };
 
-double mean(std::span<const char> data){
+double process_data(std::span<const char> data){
     return std::accumulate(data.begin(), data.end(), 0.0)/data.size();
 }
 
@@ -21,7 +21,7 @@ void thread_fn(sigval_t value){
 
     auto size = check(aio_return(*&args->cb));
 
-    std::cout << mean({args->buffer, (size_t)size})<< std::endl;
+    std::cout << process_data({args->buffer, (size_t) size}) << std::endl;
     std::cout << "Thread completed " << std::endl;
     exit(0);
 }
@@ -79,8 +79,9 @@ int main(){
     aiocb* wait_list[] = {&cb0};
     check(aio_suspend(wait_list, 1, nullptr));
     auto size = check(aio_return(&cb0));
-    std::cout << mean({buffer, (size_t)size}) << std::endl;
+    std::cout << process_data({buffer, (size_t) size}) << std::endl;
     std::cout << "First request completed"<< std::endl;
+
 
     std::cout << "Starting second request"<< std::endl;
     check(aio_read(&cb1));
@@ -90,7 +91,9 @@ int main(){
         sigsuspend(&set);
     }
     size = check(aio_return(&cb1));
-    std::cout << mean({buffer, (size_t)size}) << std::endl;
+
+
+    std::cout << process_data({buffer, (size_t) size}) << std::endl;
     std::cout << "Second request completed"<< std::endl;
 
     std::cout << "Starting third request"<< std::endl;

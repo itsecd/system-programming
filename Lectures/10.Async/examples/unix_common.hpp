@@ -13,12 +13,28 @@ inline int enable_passcred(int sockfd){
 }
 
 
-template<typename T, int TYPE>
-std::optional<T> get_ancillary_info(int sockfd){
+template<int T>
+struct ancillary_data{
+    using type = void;
+};
+
+template<>
+struct  ancillary_data<SCM_RIGHTS> {
+    using type=int;
+};
+
+template<>
+struct ancillary_data<SCM_CREDENTIALS> {
+using type=ucred;
+};
+
+template< int TYPE>
+std::optional<typename ancillary_data<TYPE>::type> get_ancillary_info(int sockfd){
+    using RESULT_TYPE = ancillary_data<TYPE>::type;
     static_assert(TYPE == SCM_RIGHTS || TYPE == SCM_CREDENTIALS);
     char data_buffer[1];                                           //buffer
     iovec data_iov{.iov_base = data_buffer, .iov_len = 1};         //iovector pointing to a buffer
-    alignas(cmsghdr) char spec_buffer[CMSG_SPACE(sizeof(T))];      //buffer for ancillary data
+    alignas(cmsghdr) char spec_buffer[CMSG_SPACE(sizeof(RESULT_TYPE))];      //buffer for ancillary data
     std::fill_n(spec_buffer, sizeof spec_buffer, 0);
     msghdr msg{
             .msg_iov = &data_iov,.msg_iovlen = 1,                               //iovector(s) for ordinary data
@@ -33,7 +49,7 @@ std::optional<T> get_ancillary_info(int sockfd){
     }
     if(!cmsg) //no ancillary info
         return std::nullopt;
-    return *(T*)CMSG_DATA(cmsg);
+    return *(RESULT_TYPE*)CMSG_DATA(cmsg);
 }
 
 #endif //LECTURE10_UNIX_COMMON_HPP
