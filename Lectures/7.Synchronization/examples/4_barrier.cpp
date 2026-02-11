@@ -6,7 +6,7 @@
 
 void* A(void*){
     COUT << "A begin"<<std::endl;
-    timespec t{.tv_nsec = 300000};
+    timespec t{.tv_nsec = 3000000};
     nanosleep(&t,nullptr);
     COUT << "A end"<<std::endl;
     return nullptr;
@@ -15,7 +15,7 @@ void* A(void*){
 
 void* B(void*){
     COUT << "B begin"<<std::endl;
-    timespec t{.tv_nsec = 600000};
+    timespec t{.tv_nsec = 6000000};
     nanosleep(&t,nullptr);
     COUT << "B end"<<std::endl;
     return nullptr;
@@ -23,7 +23,7 @@ void* B(void*){
 
 void* C(void*){
     COUT << "C begin"<<std::endl;
-    timespec t{.tv_nsec = 100000};
+    timespec t{.tv_nsec = 1000000};
     nanosleep(&t,nullptr);
     COUT << "C end"<<std::endl;
     return nullptr;
@@ -32,7 +32,7 @@ void* C(void*){
 
 void* D(void*){
     COUT << "D begin"<<std::endl;
-    timespec t{.tv_nsec = 400000};
+    timespec t{.tv_nsec = 4000000};
     nanosleep(&t,nullptr);
     COUT << "D end"<<std::endl;
     return nullptr;
@@ -40,7 +40,7 @@ void* D(void*){
 
 void* E(void*){
     COUT << "E begin"<<std::endl;
-    timespec t{.tv_nsec = 200000};
+    timespec t{.tv_nsec = 2000000};
     nanosleep(&t,nullptr);
     COUT << "E end"<<std::endl;
     return nullptr;
@@ -88,6 +88,7 @@ void parallel_join(){
 }
 
 void parallel_barrier(){
+    check_result(pthread_barrier_init(&barrier, nullptr, 2));
     pthread_t t;
     check_result(pthread_create(&t, nullptr,  ACE, nullptr));
     BDE(nullptr);
@@ -96,7 +97,6 @@ void parallel_barrier(){
 
 
 int main(){
-    check_result(pthread_barrier_init(&barrier, nullptr, 2));
     {
         ScopedTimer _{"Sequential"};
         sequential();
