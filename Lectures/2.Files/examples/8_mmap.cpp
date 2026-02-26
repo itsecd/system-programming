@@ -52,6 +52,7 @@ void read_regular(std::string_view fname){
         std::cout << u << " ";
     }
     std::cout << std::endl;
+    close(fd);
 }
 
 size_t get_file_size(int fd){
@@ -66,6 +67,7 @@ void read_mmap(std::string_view fname){
     size_t size = get_file_size(fd);
 
     User* users = (User*)check(mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0));
+    close(fd);
     for(int i = 0; i < size / sizeof(User); ++i)
         std::cout << users[i] << " ";
 
