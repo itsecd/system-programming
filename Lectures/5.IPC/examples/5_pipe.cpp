@@ -8,7 +8,7 @@ void reader(int fd){
     while(true) {
         Message m{};
         ssize_t read_size = check(read(fd, &m, sizeof m));
-        if(read_size == 0) exit(0);
+        if(read_size == 0) exit(0); // read() can return 0 only if a "line break" occured
         COUT << m << std::endl;
     }
 }
@@ -19,11 +19,13 @@ void writer(int fd){
         Message m{};
         read_message(m);
 
-        check(write(fd, &m, sizeof m));
+        check(write(fd, &m, sizeof m)); // if a "line break" is detected, the process will die here, no action needed
 
         struct timespec t{.tv_sec=0, .tv_nsec=100000};
-        nanosleep(&t, nullptr);
-        ask_continue();
+        nanosleep(&t, nullptr); // small delay to give some time for the reader to print the message
+
+        if (not ask_continue())
+            exit(EXIT_SUCCESS);
     }
 }
 

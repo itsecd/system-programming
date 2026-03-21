@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <signal.h>
+#include <sys/wait.h>
+
 #include "check.hpp"
 
 #define COUT (std::cout << getpid() << ">> ")
@@ -37,13 +39,29 @@ inline void read_message( Message& m){
     m.str[size] = 0;
 }
 
-
-inline void ask_continue(){
+[[nodiscard]]
+inline bool ask_continue(){
     COUT << "Continue? " << std::endl;
     std::string str;
     std::cin >> str;
-    if( tolower(str[0]) != 'y') exit(0);
+    return (tolower(str[0]) == 'y');
 }
+
+
+inline bool is_parent_alive(pid_t parent_pid) {
+    return getppid() == parent_pid;
+}
+
+inline bool is_child_alive(pid_t child_pid) {
+    int status;
+    int ok = waitpid(child_pid, &status, WNOHANG);
+    if (ok == child_pid) {
+        if (WIFSIGNALED(status) || WIFEXITED(status))
+            return false;
+    }
+    return true;
+}
+
 
 
 #endif //LECTURE5_MESSAGE_HPP

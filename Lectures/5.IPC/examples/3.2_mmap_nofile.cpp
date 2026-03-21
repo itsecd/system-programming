@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "common.hpp"
+#include <wait.h>
 #include <sys/mman.h>
 #include <memory.h>
 
@@ -15,6 +16,7 @@ inline bool process_exists(pid_t pid){
         return true; // process exists (either alive or a zombie)
     return errno != ESRCH; // if errno==ESRCH, there is no such process
 }
+
 
 constexpr int MESSAGE_WRITTEN_SIGNAL = SIGUSR1;
 constexpr int MESSAGE_READ_SIGNAL = SIGUSR2;
@@ -38,9 +40,9 @@ void reader(const volatile Message* m, pid_t writer_pid){
         }
 
         memcpy(&local, (const void*)m, sizeof local);
-        check(kill(writer_pid, MESSAGE_READ_SIGNAL));
-
         COUT << local << std::endl;
+
+        check(kill(writer_pid, MESSAGE_READ_SIGNAL));
     }
 }
 
@@ -66,20 +68,12 @@ void writer(volatile Message* m, pid_t reader_pid){
     }
 }
 
-const char SHM_NAME[] = "/SHM_";
 
 int main(){
     const auto PAGE_SIZE = (size_t)sysconf(_SC_PAGE_SIZE);
-
-    shm_unlink(SHM_NAME); // delete the file if it exists. note, that check() is not used in this case
-    int fd = check(shm_open(SHM_NAME, O_RDWR|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR));
-    check(ftruncate(fd, sizeof (Message)));
-
-    volatile Message* ptr = (Message*)mmap(NULL, PAGE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0 );
+    volatile Message* ptr = (Message*)mmap(NULL, PAGE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0 );
     if (ptr == MAP_FAILED)  // mmap() does not return NULL on failure
         check(NULL);
-
-    close(fd);
 
     sigset_t s;
     sigemptyset(&s);

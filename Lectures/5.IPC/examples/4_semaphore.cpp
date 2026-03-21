@@ -23,11 +23,15 @@ void synchronized(volatile long long* x, sem_t* sem){
 
 const char SEM_NAME[] = "/SEM_";
 const char SHM_NAME[] = "/SHM2_";
-const size_t PAGE_SIZE = 4096;
+
 
 int main(int argc, char** argv){
+    const auto PAGE_SIZE = (size_t)sysconf(_SC_PAGE_SIZE);
+
     sem_unlink(SEM_NAME);
-    sem_t* s = check(sem_open(SEM_NAME, O_CREAT|O_EXCL, S_IRUSR|S_IWUSR, 1));
+    sem_t* s = sem_open(SEM_NAME, O_CREAT|O_EXCL, S_IRUSR|S_IWUSR, 1);
+    if (s == SEM_FAILED) // technically, a normal check() can work, since SEM_FAILED is NULL, but this is not fixed in POSIX.
+        check(NULL);
 
     shm_unlink(SHM_NAME);
     int fd = check(shm_open(SHM_NAME, O_RDWR|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR));

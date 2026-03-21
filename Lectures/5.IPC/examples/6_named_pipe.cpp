@@ -8,7 +8,7 @@ void reader(int fd){
     while(true) {
         Message m{};
         ssize_t read_size = check(read(fd, &m, sizeof m));
-        if(read_size == 0) exit(0);
+        if(read_size == 0) exit(EXIT_SUCCESS);
         COUT << m << std::endl;
     }
 }
@@ -23,7 +23,8 @@ void writer(int fd){
 
         struct timespec t{.tv_sec=0, .tv_nsec=100000};
         nanosleep(&t, nullptr);
-        ask_continue();
+        if (not ask_continue())
+            exit(EXIT_SUCCESS);
     }
 }
 

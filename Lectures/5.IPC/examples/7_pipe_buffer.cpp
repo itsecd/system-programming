@@ -5,7 +5,7 @@
 #include <limits.h>
 
 const size_t BIG_MESSAGE_SIZE = PIPE_BUF + 1;
-const size_t SMALL_MESSAGE_SIZE = PIPE_BUF - 1;
+const size_t SMALL_MESSAGE_SIZE = PIPE_BUF-1;
 
 const size_t MESSAGES_COUNT = 10;
 const size_t WRITERS_COUNT = 4;
@@ -17,7 +17,7 @@ void writer(int write_fd, size_t msg_size, char value){
 
     for(size_t i = 0; i < MESSAGES_COUNT; ++i)
         check(write(write_fd, buffer, msg_size));
-
+    exit(0);
 }
 
 void reader(int read_fd, size_t msg_size){
@@ -26,7 +26,7 @@ void reader(int read_fd, size_t msg_size){
     for(size_t i = 0; i < MESSAGES_COUNT*WRITERS_COUNT; ++i) {
 
         size_t current_pos = 0;
-        while(current_pos != msg_size)
+        while(current_pos != msg_size)  // read the whole message
             current_pos += check(read(read_fd, buffer+current_pos, msg_size-current_pos));
 
         bool ok = true;
@@ -46,6 +46,18 @@ void reader(int read_fd, size_t msg_size){
 
 }
 
+
+void run(int read_fd, int write_fd, size_t message_size) {
+    for(int i = 0; i < WRITERS_COUNT; ++i){
+        if(check(fork()) == 0) {
+            writer(write_fd, message_size, 'A' + i);
+        }
+    }
+    reader(read_fd, SMALL_MESSAGE_SIZE);
+    while(check_except(wait(NULL), ECHILD) >= 0) {}    // WAIT for all children
+}
+
+
 int main()
 {
     int pipefd[2];
@@ -53,28 +65,11 @@ int main()
     auto [read_fd, write_fd] = pipefd;
 
     printf("Small message size: %lu \nBig message size: %lu\n", SMALL_MESSAGE_SIZE, BIG_MESSAGE_SIZE);
+
     puts("\n============Small messages============:");
-
-    for(int i = 0; i < WRITERS_COUNT; ++i){
-        if(check(fork()) == 0) {
-            writer(write_fd, SMALL_MESSAGE_SIZE, 'A' + i);
-            exit(0);
-        }
-    }
-    reader(read_fd, SMALL_MESSAGE_SIZE);
-    while(check_except(wait(NULL), ECHILD) >= 0) {}    // WAIT for all children
-
+    run(read_fd, write_fd, SMALL_MESSAGE_SIZE);
 
     puts("\n============Big messages==============:");
-
-    for(int i = 0; i < WRITERS_COUNT; ++i){
-        if(check(fork()) == 0) {
-            writer(write_fd, BIG_MESSAGE_SIZE, 'A' + i);
-            exit(0);
-        }
-    }
-    reader(read_fd, BIG_MESSAGE_SIZE);
-    while(check_except(wait(NULL), ECHILD) >= 0) {}    // WAIT for all children
-
+    run(read_fd, write_fd, BIG_MESSAGE_SIZE);
 }
 

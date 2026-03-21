@@ -12,16 +12,21 @@ bool is_file_empty(int fd){
 }
 
 void reader(int fd, pid_t writer_pid){
-    timespec t {.tv_sec = 0, .tv_nsec = 100000}; // 10 msec
+    timespec t {.tv_sec = 0, .tv_nsec = 10000000}; // 10 msec
 
-    while(1) {
+    while(true) {
+        //get the lock
+        // get the file lock
+        bool has_file_lock = false;
+        do {
+            has_file_lock = check_except(flock(fd, LOCK_EX|LOCK_NB), EWOULDBLOCK) == 0;
+            if (not is_parent_alive(writer_pid))
+                exit(EXIT_SUCCESS);
+            if (not has_file_lock)
+                nanosleep(&t, NULL); // small delay to slow down the cycle
+        } while(not has_file_lock);
 
-        do{
-            if (getppid() != writer_pid)
-                exit(-1);
-            nanosleep(&t, NULL);
-        }while(check_except(flock(fd, LOCK_EX|LOCK_NB), EWOULDBLOCK) != 0); // LOCK
-
+        //if there is an unread message - read and process
         if(!is_file_empty(fd)) {
             Message m{};
             check(lseek(fd, SEEK_SET, 0));
@@ -30,41 +35,44 @@ void reader(int fd, pid_t writer_pid){
             check(ftruncate(fd, 0));
         }
 
+        //release the lock
         flock(fd, LOCK_UN);                                               // UNLOCK
     }
 }
 
-
 void writer(int fd, pid_t reader_pid){
 
     timespec t {.tv_sec = 0, .tv_nsec = 10000000};
-
     Message m{};
-    bool read_new_message = true;
-    while(1){
-        if(read_new_message){
-            read_message(m);
-            read_new_message = false;
-        }
 
+    while (true) {
+        read_message(m);
+
+        bool message_written = false;
         do {
-            if (waitpid(reader_pid, NULL, WNOHANG) != 0)
-                exit(-1);
-            nanosleep(&t, NULL);
-        } while(check_except(flock(fd, LOCK_EX|LOCK_NB), EWOULDBLOCK) != 0); // LOCK
+            // get the file lock
+            bool has_file_lock = false;
+            do {
+                has_file_lock = check_except(flock(fd, LOCK_EX|LOCK_NB), EWOULDBLOCK) == 0;
+                if (not is_child_alive(reader_pid))
+                    exit(EXIT_FAILURE);
+                if (not has_file_lock)
+                    nanosleep(&t, NULL); // small delay to slow down the cycle
+            } while(not has_file_lock);
 
-        if(is_file_empty(fd)) {
-            read_new_message = true;
-            check(lseek(fd, SEEK_SET, 0));
-            check(write(fd, &m, sizeof m));
-        }
-        flock(fd, LOCK_UN);                                                  // UNLOCK
+            // check if a previous message was written
+            if (is_file_empty(fd)) {
+                //if yes - write a new message
+                check(lseek(fd, SEEK_SET, 0));
+                check(write(fd, &m, sizeof m));
+                message_written = true;
+            }
 
-        if(read_new_message)
-        {
-            nanosleep(&t, nullptr);
-            ask_continue();
-        }
+            flock(fd, LOCK_UN); // don't forget to release the lock!
+        }while (not message_written);
+
+        if (!ask_continue())
+            exit(EXIT_SUCCESS);
     }
 }
 
