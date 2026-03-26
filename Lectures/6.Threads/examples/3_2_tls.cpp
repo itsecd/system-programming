@@ -32,20 +32,20 @@ void destroy_named_object(void* obj){
 }
 
 NamedObject* get_thread_local(){
-    auto thread_local_obj = (NamedObject*)pthread_getspecific(thread_local_key);
-    if(thread_local_obj == nullptr)
+    auto thread_local_ = (NamedObject*)pthread_getspecific(thread_local_key);
+    if(thread_local_ == nullptr)
     {
-        thread_local_obj = new NamedObject("Thread-local");
-        check_result(pthread_setspecific(thread_local_key, thread_local_obj));
+        thread_local_ = new NamedObject("Thread-local");
+        check_result(pthread_setspecific(thread_local_key, thread_local_));
     }
-    return thread_local_obj;
+    return thread_local_;
 }
 
 void* thread_fn(void* arg_){
     int* arg = (int*)arg_;
-    auto thread_global = get_thread_local();
+    auto thread_local_ = get_thread_local();
 
-    ++thread_global->value;
+    ++thread_local_->value;
     ++global.value;
     timespec ts{.tv_sec = 0, .tv_nsec = 300000000};
     nanosleep(&ts, nullptr);
@@ -60,7 +60,7 @@ int main(){
     check_result(pthread_key_create(&thread_local_key, destroy_named_object));
 
 
-    global.value = -1;
+    global.value = 0;
 
     size_t thread_count;
     while(true){

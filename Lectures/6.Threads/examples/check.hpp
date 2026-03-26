@@ -72,11 +72,20 @@ namespace DO_NOT_USE_DIRECTLY {
 
 }
 
-//USE ONLY THIS MACRO
+//USE ONLY THOSE MACRO
+
+
+//Check the returned value, kill the process if the value equals to 0 or NULL, with error reason taken from the errno
 //Example: int fd = check(open("file", O_CREAT|O_RDWR, S_IRWXU));
 #define check(x) DO_NOT_USE_DIRECTLY::xcheck(x, __FILE__, __LINE__ )
+
+//Check the returned value, kill the process if the value is not equal to 0, with error reason taken from the value
+//Example: check_result(pthread_join(NULL));
 #define check_result(x) DO_NOT_USE_DIRECTLY::xcheck<true>(x, __FILE__, __LINE__ )
-#define check_except(x,...) DO_NOT_USE_DIRECTLY::xcheck_except(x, __FILE__, __LINE__, __VA_ARGS__)
+
+//Same as check(), but do not kill on allowed errors
+//Example: int fd = check(open("file", O_CREAT|O_RDWR, S_IRWXU), EISDIR, EPERM);
+#define check_allowed(x,...) DO_NOT_USE_DIRECTLY::xcheck_except(x, __FILE__, __LINE__, __VA_ARGS__)
 
 //https://en.cppreference.com/w/cpp/preprocessor/replace#Predefined_macros
 

@@ -26,22 +26,20 @@ struct NamedObject{
 NamedObject global{"Global"};
 
 
-thread_local  NamedObject thread_global{"Thread-local"}; // created only if there is any operation with this object
+thread_local  NamedObject thread_local_{"Thread-local"}; // created only if there is any operation with this object
 
 
 void* thread_fn(void* arg_){
-    int* arg = (int*)arg_;
-    ++thread_global.value;
+    ++thread_local_.value;
     ++global.value;
     timespec ts{.tv_sec = 0, .tv_nsec = 300000000};
     nanosleep(&ts, nullptr); // imitate some work
-    delete arg;
     return nullptr;
 };
 
 int main(){
 
-    global.value = -1;
+    global.value = 0;
     size_t thread_count;
     while(true){
         COUT << "Threads count:";
@@ -53,7 +51,7 @@ int main(){
     for(size_t i = 0; i < thread_count; ++i)
     {
         pthread_t tid;
-        check_result(pthread_create(&tid, nullptr, thread_fn, new int(i)));
+        check_result(pthread_create(&tid, nullptr, thread_fn, nullptr));
         threads.push_back(tid);
     }
 
