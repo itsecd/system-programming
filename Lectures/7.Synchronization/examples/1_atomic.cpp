@@ -1,10 +1,8 @@
 #include "common.hpp"
-
 #include <atomic>
-#include <iostream>
 
-const int MAX_VALUE =1000000;
-const size_t THREADS_COUNT = 16;
+constexpr int MAX_VALUE =1000000;
+constexpr size_t THREADS_COUNT = 16;
 
 static_assert(MAX_VALUE > 0);
 
@@ -25,13 +23,13 @@ int main(){
 
     {
         ScopedTimer s{"Non-atomic"};
-        join_threads(spawn_threads(THREADS_COUNT, non_atomic_fn));
+        join_threads(spawn_threads(non_atomic_fn, THREADS_COUNT));
         std::cout << "Non-atomic result: " << value << std::endl;
     }
 
     {
         ScopedTimer s{"Atomic"};
-        join_threads(spawn_threads(THREADS_COUNT, atomic_fn));
+        join_threads(spawn_threads(atomic_fn, THREADS_COUNT));
         std::cout << "Atomic result: " << atomic_value << std::endl;
     }
 

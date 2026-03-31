@@ -1,51 +1,27 @@
 #include <span>
 #include <random>
-#include <iostream>
 #include "common.hpp"
 
 
-void* A(void*){
-    COUT << "A begin"<<std::endl;
-    timespec t{.tv_nsec = 3000000};
-    nanosleep(&t,nullptr);
-    COUT << "A end"<<std::endl;
-    return nullptr;
-}
+constexpr nanoseconds A_DELAY = 5'000'000,
+                      B_DELAY = 5'000'000,
+                      C_DELAY = 5'000'000,
+                      D_DELAY = 5'000'000,
+                      E_DELAY = 5'000'000;
 
 
-void* B(void*){
-    COUT << "B begin"<<std::endl;
-    timespec t{.tv_nsec = 6000000};
-    nanosleep(&t,nullptr);
-    COUT << "B end"<<std::endl;
-    return nullptr;
-}
+#define MAKE_FN(NAME)  \
+void* NAME (void*) {\
+COUT_S << #NAME " start"<<std::endl; \
+delay(NAME ## _DELAY);\
+COUT_S << #NAME " end"<<std::endl; \
+return nullptr;} \
 
-void* C(void*){
-    COUT << "C begin"<<std::endl;
-    timespec t{.tv_nsec = 1000000};
-    nanosleep(&t,nullptr);
-    COUT << "C end"<<std::endl;
-    return nullptr;
-}
-
-
-void* D(void*){
-    COUT << "D begin"<<std::endl;
-    timespec t{.tv_nsec = 4000000};
-    nanosleep(&t,nullptr);
-    COUT << "D end"<<std::endl;
-    return nullptr;
-}
-
-void* E(void*){
-    COUT << "E begin"<<std::endl;
-    timespec t{.tv_nsec = 2000000};
-    nanosleep(&t,nullptr);
-    COUT << "E end"<<std::endl;
-    return nullptr;
-}
-
+MAKE_FN(A);
+MAKE_FN(B);
+MAKE_FN(C);
+MAKE_FN(D);
+MAKE_FN(E);
 
 pthread_barrier_t  barrier;
 
@@ -101,12 +77,12 @@ int main(){
         ScopedTimer _{"Sequential"};
         sequential();
     }
-    COUT << std::endl;
+    std::cout << std::endl;
     {
         ScopedTimer _{"Parallel"};
         parallel_join();
     }
-    COUT << std::endl;
+    std::cout << std::endl;
     {
         ScopedTimer _{"Parallel with barrier"};
         parallel_barrier();

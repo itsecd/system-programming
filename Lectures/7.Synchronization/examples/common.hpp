@@ -9,10 +9,29 @@
 #include <chrono>
 #include <string_view>
 #include <vector>
+#include <iostream>
 
-#include <syncstream>
 
-#define COUT std::osyncstream(std::cout)
+struct SynchronizedCout
+{
+    explicit SynchronizedCout();
+    ~SynchronizedCout();
+
+    template<typename T>
+    friend const SynchronizedCout& operator<<(const SynchronizedCout& ss, T&& value)
+    {
+        std::cout <<value;
+        return ss;
+    }
+
+    friend const SynchronizedCout& operator<<(const SynchronizedCout& ss, std::ostream&(*value)(std::ostream&) )
+    {
+        value(std::cout);
+        return ss;
+    }
+};
+
+#define COUT_S SynchronizedCout()
 
 struct ScopedTimer{
     using clock_t = std::chrono::high_resolution_clock;
@@ -21,10 +40,23 @@ struct ScopedTimer{
     const clock_t::time_point start_time;
     explicit ScopedTimer(std::string_view  name);
     ~ScopedTimer();
-
 };
 
-std::vector<pthread_t> spawn_threads(size_t size, void*(*fn)(void*));
-void join_threads(const std::vector<pthread_t>& tids);
+using thread_fn = void*(*)(void*);
+
+std::vector<pthread_t> spawn_threads(thread_fn thread_function, size_t count, void* arg = nullptr);
+std::vector<pthread_t> spawn_threads(thread_fn thread_function, const std::vector<void*> &args);
+
+[[maybe_unused]]
+std::vector<void*> join_threads(const std::vector<pthread_t>& thread_ids);
+
+
+using nanoseconds = unsigned int;
+
+inline void delay(nanoseconds sleep_time){
+    if (sleep_time == 0) return;
+    timespec sleep_time_(sleep_time/1'000'000'000,sleep_time % 1'000'000'000 );
+    nanosleep(&sleep_time_, NULL);
+}
 
 #endif //LECTURE6_COMMON_HPP
