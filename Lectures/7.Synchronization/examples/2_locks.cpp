@@ -1,15 +1,15 @@
 #include "common.hpp"
 
 constexpr size_t THREADS_COUNT = 2;
-constexpr size_t RESOURCE_USE_COUNT = 16*1024;
+constexpr size_t RESOURCE_USE_COUNT = 1024;
 
 class Resource  {
-    const nanoseconds preparing_delay;
-    const nanoseconds processing_delay;
+    const microseconds preparing_delay;
+    const microseconds processing_delay;
 
     size_t _uses_left = 0;
 public:
-    Resource(size_t uses_count, nanoseconds preparing_delay, nanoseconds processing_delay):
+    Resource(size_t uses_count, microseconds preparing_delay, microseconds processing_delay):
         _uses_left(uses_count), preparing_delay(preparing_delay), processing_delay(processing_delay){}
 
     Resource(const Resource&) = delete;
@@ -38,7 +38,7 @@ public:
 class ResourceWithMutex : public Resource {
     pthread_mutex_t _mutex;
 public:
-    explicit ResourceWithMutex(size_t uses_count,nanoseconds producing_delay ={}, nanoseconds consuming_delay={}): Resource(uses_count,producing_delay, consuming_delay) {
+    explicit ResourceWithMutex(size_t uses_count,microseconds producing_delay ={}, microseconds consuming_delay={}): Resource(uses_count,producing_delay, consuming_delay) {
         check_result(pthread_mutex_init(&_mutex, NULL));
     }
 
@@ -61,7 +61,7 @@ class ResourceWithSpinLock : public Resource {
     //alignas(64)
     pthread_spinlock_t _spin;
 public:
-    explicit ResourceWithSpinLock(size_t uses_count, nanoseconds producing_delay ={}, nanoseconds consuming_delay={}): Resource(uses_count, producing_delay, consuming_delay) {
+    explicit ResourceWithSpinLock(size_t uses_count, microseconds producing_delay ={}, microseconds consuming_delay={}): Resource(uses_count, producing_delay, consuming_delay) {
         check_result(pthread_spin_init(&_spin, false));
     }
 
@@ -102,22 +102,20 @@ void* worker_thread(void* arg) {
 }
 
 
-
-
 template<typename TResource>
 void run_experiment() {
     constexpr size_t THREADS_NUMS[] {1, 2, 4, 8};
-    constexpr nanoseconds PROCESSING_DELAYS[] {0, 5'000, 100'000};
+    constexpr microseconds PROCESSING_DELAYS[] {0, 100, 1000};
     constexpr unsigned PREPARING_TO_PROCESSING_COEFFS[] {0, 1, 5};
 
     for (auto processing_delay: PROCESSING_DELAYS) {
         for (auto preparing_delay_coeff: PREPARING_TO_PROCESSING_COEFFS) {
             for (auto num_threads: THREADS_NUMS) {
-                nanoseconds preparing_delay = preparing_delay_coeff * processing_delay;
+                microseconds preparing_delay = preparing_delay_coeff * processing_delay;
                 if (processing_delay ==0 && preparing_delay_coeff != 0)
                     preparing_delay = preparing_delay_coeff * 100;
                 TResource resource{RESOURCE_USE_COUNT, preparing_delay, processing_delay};
-                ScopedTimer _{std::format("{}ns / {}ns / {} threads", preparing_delay, processing_delay, num_threads)};
+                ScopedTimer _{std::format("{}us / {}us / {} threads", preparing_delay, processing_delay, num_threads)};
                 join_threads(spawn_threads(worker_thread, num_threads, &resource));
             }
         }

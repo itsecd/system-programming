@@ -2,8 +2,8 @@
 #include "common.hpp"
 
 constexpr size_t CONSUMERS_COUNT = 4;
-constexpr size_t VALUES_PER_CONSUMER = 81920;
-constexpr nanoseconds CONSUMING_DELAY = 100;
+constexpr size_t VALUES_PER_CONSUMER = 8192;
+constexpr microseconds CONSUMING_DELAY = 100;
 
 struct {
     pthread_mutex_t  mutex = PTHREAD_MUTEX_INITIALIZER;

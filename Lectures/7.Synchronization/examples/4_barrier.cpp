@@ -3,11 +3,11 @@
 #include "common.hpp"
 
 
-constexpr nanoseconds A_DELAY = 5'000'000,
-                      B_DELAY = 5'000'000,
-                      C_DELAY = 5'000'000,
-                      D_DELAY = 5'000'000,
-                      E_DELAY = 5'000'000;
+constexpr microseconds A_DELAY = 5'000,
+                      B_DELAY = 5'000,
+                      C_DELAY = 5'000,
+                      D_DELAY = 5'000,
+                      E_DELAY = 5'000;
 
 
 #define MAKE_FN(NAME)  \

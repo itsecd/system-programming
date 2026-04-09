@@ -51,11 +51,11 @@ std::vector<pthread_t> spawn_threads(thread_fn thread_function, const std::vecto
 std::vector<void*> join_threads(const std::vector<pthread_t>& thread_ids);
 
 
-using nanoseconds = unsigned int;
+using microseconds = unsigned int;
 
-inline void delay(nanoseconds sleep_time){
+inline void delay(microseconds sleep_time){
     if (sleep_time == 0) return;
-    timespec sleep_time_(sleep_time/1'000'000'000,sleep_time % 1'000'000'000 );
+    timespec sleep_time_(sleep_time/1'000'000,sleep_time % 1'000'000 * 1000 );
     nanosleep(&sleep_time_, NULL);
 }
 
