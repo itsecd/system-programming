@@ -99,7 +99,7 @@ int main(int argc, char** argv){
             std::cout << current_ids << std::endl << std::endl;
             break;
         } else {
-            std::cout << "Regained the root privileges (possibly because of saved UID) " << std::endl;
+            std::cout << "Regained the root privileges (?!) " << std::endl;
             std::cout << current_ids << std::endl << std::endl;
         }
     }

@@ -7,7 +7,8 @@
 std::string get_exe_path(){
     const size_t buf_size = 4097;
     std::unique_ptr<char[]> buf { new char [buf_size] };
-    check(readlink("/proc/self/exe", buf.get(), buf_size));
+    ssize_t read_size = check(readlink("/proc/self/exe", buf.get(), buf_size));
+    buf[read_size] = 0;
     return {buf.get() };
 }
 
