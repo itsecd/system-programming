@@ -8,7 +8,7 @@ int main() {
     while (1) {
         read_message(msg);
         msg.to_net_order();
-        send(sock_fd, &msg, sizeof msg, MSG_WAITALL);
+        check(send(sock_fd, &msg, sizeof msg,0));
         if(!ask_continue())
             break;
     }

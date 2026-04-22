@@ -4,8 +4,7 @@
 
 
 void authenticate(int sockfd){
-        int t;
-        check(recv(sockfd, &t, 1, 0));//wait the server
+        int t{};
         check(send(sockfd, &t, 1, 0));//send 1 byte (credentials are passed automatically)
 }
 
@@ -16,7 +15,7 @@ int get_fd(){
     strncpy(addr.sun_path, UNIX_SOCKET_NAME, sizeof UNIX_SOCKET_NAME);
     check(connect(sockfd, (sockaddr*)&addr, sizeof addr)); //connecting to an existing socket
     authenticate(sockfd);
-    auto fd = get_ancillary_info< SCM_RIGHTS>(sockfd);
+    auto fd = recv_ancillary_info< SCM_RIGHTS>(sockfd);
     return fd ? *fd : -1;
 }
 

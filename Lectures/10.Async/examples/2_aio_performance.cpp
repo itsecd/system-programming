@@ -6,8 +6,8 @@
 #include <span>
 #include <optional>
 
-const size_t SIZE = 128*1024*1024;
-const size_t BLOCK_SIZE = 64*1024;
+const size_t SIZE = 16*1024*1024;
+const size_t BLOCK_SIZE = 4*1024;
 const char FILENAME[] = "testfile_";
 
 static_assert(SIZE >= BLOCK_SIZE);
@@ -25,8 +25,8 @@ int create_file(){
     return fd;
 }
 
-void sequential(){
-    ScopedTimer _{"Sequential"};
+void synchronous(){
+    ScopedTimer _{"Synchronous"};
     std::vector<char> buffer;
     buffer.resize(BLOCK_SIZE);
     auto fd = create_file();
@@ -73,7 +73,7 @@ void asynchronous(){
 
 int main(int argc, char** argv){
     e.seed(0);
-    sequential();
+    synchronous();
     e.seed(0);
     asynchronous();
 }

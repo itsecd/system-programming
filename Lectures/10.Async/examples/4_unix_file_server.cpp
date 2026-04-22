@@ -12,30 +12,31 @@ void send_file(int sockfd, int filefd){
     alignas(cmsghdr) char spec_buffer[CMSG_SPACE(sizeof(int))] {};    //buffer for ancillary data
 
     msghdr msg{
-            .msg_iov = &data_iov,.msg_iovlen = 1,                               //iovector(s) for ordinary data
-            .msg_control = spec_buffer,.msg_controllen = sizeof(spec_buffer)};  //buffer for ancillary data
+            .msg_iov = &data_iov,       //iovector(s) for ordinary data
+            .msg_iovlen = 1,
+            .msg_control = spec_buffer, //buffer for ancillary data
+            .msg_controllen = sizeof(spec_buffer)};
 
     cmsghdr* chdr = CMSG_FIRSTHDR(&msg);
     chdr->cmsg_len = CMSG_LEN(sizeof(int));
-    chdr->cmsg_level = SOL_SOCKET; //UNIX socket level
+    chdr->cmsg_level = SOL_SOCKET; //socket level
     chdr->cmsg_type = SCM_RIGHTS; //transferring descriptors
     *(int*)CMSG_DATA(chdr) = filefd;
     check(sendmsg(sockfd, &msg, 0));
 }
 
 bool authenticate(int sockfd){
-    check(send(sockfd, &sockfd, 1, 0)); //send 1 byte to indicate that we're ready to receive creds
-    auto cred = get_ancillary_info< SCM_CREDENTIALS>(sockfd); //get auth info
+    auto cred = recv_ancillary_info< SCM_CREDENTIALS>(sockfd); //get auth info
 
-    if(cred.has_value()){
+    if(cred){
         std::cout << "Got request from UID " << cred->uid<< std::endl;
         std::cout << "Access " << (cred->uid == ALLOWED_UID ? "granted" : "rejected") <<std::endl;
         return cred->uid == ALLOWED_UID;
     }
-    else{
-        std::cout << " No auth data were passed " << std::endl;
-        return false;
-    }
+
+    std::cout << " No auth data were passed " << std::endl;
+    return false;
+
 }
 
 int make_hidden_file(){
@@ -48,6 +49,11 @@ int make_hidden_file(){
     close(fd);
 
     return rdonly_fd;
+}
+
+int enable_passcred(int sockfd){
+    int t = 1;
+    return setsockopt(sockfd, SOL_SOCKET, SO_PASSCRED, &t, sizeof t); //enable credentials passing
 }
 
 int make_socket() {
